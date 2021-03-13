@@ -141,7 +141,7 @@
         //     hotpot.style.transform = `rotateZ(${event.pageX / window.innerWidth * 60 - 30})deg`
         // }, 10);
 
-        posX = event.pageX / window.innerWidth * 160 - 80
+        posX = event.pageX / window.innerWidth * 200 - 100
 
         // Use event.pageX / event.pageY here
     }
@@ -151,7 +151,7 @@
     }
 
     function die(num, id) {
-        if (Math.abs(num) > 50) {
+        if (Math.abs(num) > 45) {
             clearInterval(id);
             hotpot.src = "./img/fail.png";
             bg.classList.add("stop")
