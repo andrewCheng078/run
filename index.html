@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="./main.css">
+    <title>統神端火鍋</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
+</head>
+
+<body>
+    <div id="app">
+        <div id="bg" class="stop"></div>
+        <div class="container w-100 h-100" id="game">
+            <div class="row mx-auto w-100 h-100 content" ref="gamediv">
+                <div class="col-12 mx-auto align-self-top" id="score">
+                    <h1 class="text-white">100m</h1>
+                </div>
+
+                <div class="col-12 mx-auto align-self-center" id="hotpot" :style="{transform: `rotateZ(${angle}deg)`}">
+                    <img id="hotpot-img" src="./img/hotpot.png">
+                </div>
+
+                <div class="col-12 mx-auto align-self-end" id="control">
+                    <h1 class="text-white text-center">{{ Math.round((userinput-5)*10)/10 }}</h1>
+                    <input type="range" class="form-range" v-model="userinput" min="0" max="10" step="0.1"
+                        :disabled="game !== 1" v-if="control === 0">
+                </div>
+            </div>
+
+            <div class="mx-auto startBox" id="title" v-if="game === 0">
+                <div class="row align-contents-center content mx-auto align-content-center">
+                    <div class="col-12 text-white text-center">
+                        <h1 class="display-1">統神端火鍋</h1>
+                        <h3>
+                            讓統神維持平衡
+                            <br>
+                            <span class="text-danger">
+                                <span v-if="difficulty === 0">左右傾斜超過 50 度就會跌倒</span>
+                                <span v-else-if="difficulty === 1">左右傾斜超過 60 度就會跌倒</span>
+                                <span v-else-if="difficulty === 2">轉 3 圈就會跌倒</span>
+                            </span>
+                        </h3>
+                        <br>
+                        <input id="startGame" type="button" value="開始遊戲" class="btn btn-success">
+                    </div>
+                </div>
+            </div>
+
+            <!-- <div class="mx-auto" id="gameover" v-if="game === 2">
+                <div class="row align-contents-center content mx-auto align-content-center">
+                    <div class="col-12 text-white text-center">
+                        <h1 class="display-1">遊戲結束</h1>
+                        <h1>距離: {{ scoreText }} 公尺</h1>
+                        <div class="row justify-content-between">
+                            <div class="col-4">
+                                <button type="button" class="btn btn-primary w-100" value="橫桿" @click="control = 0"
+                                    :class="{'border border-3': control === 0}">
+                                    <span class="material-icons">linear_scale</span>
+                                    <br>
+                                    橫桿
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button type="button" class="btn btn-primary w-100" value="螢幕" @click="control = 1"
+                                    :class="{'border border-3': control === 1}">
+                                    <span class="material-icons">mouse</span>
+                                    <br>
+                                    點按螢幕
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button type="button" id="gyroscope1" class="btn btn-primary w-100" value="陀螺儀"
+                                    @click="control = 2" :class="{'border border-3': control === 2}">
+                                    <span class="material-icons">screen_rotation</span>
+                                    <br>
+                                    陀螺儀
+                                </button>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <p v-if="control === 0">
+                                    調整螢幕下方的橫桿
+                                </p>
+                                <p v-if="control === 1">
+                                    點擊螢幕或滑動滑鼠、手指
+                                </p>
+                                <p v-if="control === 2">
+                                    左右傾斜裝置
+                                </p>
+                            </div>
+
+                        </div>
+                        <br>
+                        <input type="button" value="再玩一次" class="btn btn-success">
+
+
+
+                    </div>
+                </div>
+            </div> -->
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
+        crossorigin="anonymous"></script>
+
+    <!-- <script src="./js/app.js"></script> -->
+
+</body>
+
+<script>
+    const bg = document.querySelector('#bg')
+    const startBox = document.querySelector('.startBox')
+    const hotpot = document.getElementById('hotpot-img')
+    let posX = 0;
+    document.onmousemove = handleMouseMove;
+    function handleMouseMove(event) {
+        var eventDoc, doc, body;
+
+        event = event || window.event; // IE-ism
+
+        // If pageX/Y aren't available and clientX/Y are,
+        // calculate pageX/Y - logic taken from jQuery.
+        // (This is to support old IE)
+        if (event.pageX == null && event.clientX != null) {
+            eventDoc = (event.target && event.target.ownerDocument) || document;
+            doc = eventDoc.documentElement;
+            body = eventDoc.body;
+
+            event.pageX = event.clientX
+            event.pageY = event.clientY
+        }
+        // const center = window.innerWidth / 2;
+        // console.log('x', event.pageX / window.innerWidth * 60 - 30)
+
+        // setInterval(() => {
+        //     console.log('!!!')
+        //     hotpot.style.transform = `rotateZ(${event.pageX / window.innerWidth * 60 - 30})deg`
+        // }, 10);
+
+        posX = event.pageX / window.innerWidth * 200 - 100
+
+        // Use event.pageX / event.pageY here
+    }
+    function die(num, id) {
+        if (Math.abs(num) > 50) {
+            alert('die');
+            clearInterval(id);
+            hotpot.src = "./img/fail.png";
+            bg.classList.add("stop")
+            bg.classList.remove("start")
+            hotpot.style.transform = `rotateZ(0deg)`
+        }
+    }
+    document.querySelector('#startGame').addEventListener('click', () => {
+        bg.classList.add("start")
+        bg.classList.remove("stop")
+        startBox.classList.add("none")
+        hotpot.src = "./img/hotpot.gif"
+        let intervalID = setInterval(() => {
+            console.log('posX', posX)
+            hotpot.style.transform = `rotateZ(${posX}deg)`
+            die(posX, intervalID)
+        }, 100);
+
+    })
+
+</script>
+
+</html>
